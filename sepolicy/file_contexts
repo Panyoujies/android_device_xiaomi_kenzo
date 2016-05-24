@@ -1,0 +1,3 @@
+# System files
+/vendor/bin/qti                          u:object_r:qti_exec:s0
+/vendor/bin/slim_daemon                  u:object_r:location_exec:s0

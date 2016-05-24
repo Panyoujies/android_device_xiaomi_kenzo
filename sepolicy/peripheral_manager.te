@@ -1,0 +1,9 @@
+binder_service(per_mgr);
+binder_use(per_mgr);
+binder_call(rild, per_mgr);
+binder_call(per_mgr, rild);
+allow per_mgr per_mgr_service:service_manager add;
+
+
+allow per_mgr self:capability net_raw;
+allow per_mgr self:socket create_socket_perms;

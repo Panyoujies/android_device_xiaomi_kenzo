@@ -1,0 +1,5 @@
+binder_call(rild, per_mgr)
+
+allow rild time:unix_stream_socket connectto;
+
+allow rild per_mgr_service:service_manager find;
