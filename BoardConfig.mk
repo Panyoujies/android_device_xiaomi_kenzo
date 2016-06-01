@@ -123,9 +123,7 @@ TARGET_HW_DISK_ENCRYPTION := true
 TARGET_LDPRELOAD := libNimsWrap.so
 
 # Enable suspend during charger mode
-BOARD_CHARGER_ENABLE_SUSPEND := true
-BOARD_CHARGER_DISABLE_INIT_BLANK := true
-BOARD_HAL_STATIC_LIBRARIES := libhealthd.msm
+PRODUCT_PACKAGES := $(filter-out healthd , $(PRODUCT_PACKAGES))
 
 # Display
 BOARD_EGL_CFG := $(DEVICE_PATH)/configs/egl.cfg

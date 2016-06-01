@@ -189,6 +189,9 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     charger_res_images
 
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/rootdir/etc/sbin/healthd:root/sbin/healthd
+
 # Ramdisk
 PRODUCT_PACKAGES += \
     fstab.qcom \
