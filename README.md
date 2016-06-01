@@ -1,3 +1,3 @@
-# android_device_xiaomi_kenzo
+Copyright 2015 - The CyanogenMod Project
 
-Redmi Note 3 pro CM-13.0 tree
+Device configuration for Xiaomi Redmi Note 3.

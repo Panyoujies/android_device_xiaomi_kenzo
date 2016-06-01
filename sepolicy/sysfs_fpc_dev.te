@@ -1,0 +1,2 @@
+allow init sysfs_fpc_dev:filesystem associate;
+

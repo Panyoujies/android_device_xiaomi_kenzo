@@ -17,9 +17,15 @@ $(call inherit-product, device/xiaomi/kenzo/full_kenzo.mk)
 # Inherit some common CM stuff.
 $(call inherit-product, vendor/mk/config/common_full_phone.mk)
 
-PRODUCT_BRAND := Xiaomi
 PRODUCT_NAME := mk_kenzo
-BOARD_VENDOR := Xiaomi
+BOARD_VENDOR := xiaomi
+TARGET_VENDOR := xiaomi
 PRODUCT_DEVICE := kenzo
-PRODUCT_MANUFACTURER := Xiaomi
+TARGET_DEVICE := kenzo
 
+## Use the latest approved GMS identifiers unless running a signed build
+ifneq ($(SIGN_BUILD),true)
+PRODUCT_BUILD_PROP_OVERRIDES += \
+BUILD_FINGERPRINT=Xiaomi/kenzo/kenzo:6.0.1/MMB29M/6.5.23:user/release-keys \
+PRIVATE_BUILD_DESC="kenzo-user 6.0.1 MMB29M 6.5.23 release-keys"
+endif

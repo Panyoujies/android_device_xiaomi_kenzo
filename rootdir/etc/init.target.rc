@@ -34,10 +34,14 @@ on early-init
     symlink /data/tombstones /tombstones
     mkdir /dsp 0771 media media
 
+on post-fs
+    export LD_PRELOAD libNimsWrap.so
+
 on init
     mkdir /cust 0771 system system
 
 on fs
+    wait /dev/block/bootdevice
     mount_all fstab.qcom
 
     # Keeping following partitions outside fstab file. As user may not have
@@ -59,9 +63,6 @@ on fs
     wait /dev/block/bootdevice/by-name/modem
     mount vfat /dev/block/bootdevice/by-name/modem /firmware ro context=u:object_r:firmware_file:s0,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
     #write /sys/kernel/boot_adsp/boot 1
-    
-    chown system system  /dev/goodix_fp
-    chmod 0644 /dev/goodix_fp
 
 on post-fs
     # We chown/chmod /cust again so because mount is run as root + defaults
@@ -82,12 +83,15 @@ on post-fs-data
     mkdir /persist/data/sfs 0700 system system
     mkdir /persist/data/tz 0700 system system
     mkdir /data/misc/dts 0770 media audio
+    mkdir /data/misc/audio_pp 0771 media audio
+    mkdir /data/fpc 0700 system system
 
 #start camera server as daemon
 service qcamerasvr /system/bin/mm-qcamera-daemon
     class late_start
     user camera
     group camera system inet input graphics
+    writepid /dev/cpuset/system-background/tasks
 
 on init
    write /sys/module/qpnp_rtc/parameters/poweron_alarm 1
@@ -96,7 +100,7 @@ on init
 on property:ro.config.zram=true
     swapon_all fstab.qcom
     write /proc/sys/vm/swappiness 100
-   setprop persist.camera.stats.test 5
+    setprop persist.camera.stats.test 5
 
 service qfp-daemon /system/bin/qfp-daemon
    class late_start
@@ -109,11 +113,6 @@ on property:persist.usb.chgdisabled=1
 
 on property:persist.usb.chgdisabled=0
     write /sys/class/power_supply/battery/charging_enabled 1
-
-service ischarger /system/bin/sh /init.usb.charger.sh
-    class main
-    user root
-    oneshot
 
 service qrngd /system/bin/qrngd -f
    class main
@@ -128,7 +127,6 @@ service qrngp /system/bin/qrngp -f
    disabled
 
 on property:sys.boot_completed=1
-   start ischarger
    start qrngp
 
 service qseecomd /system/bin/qseecomd
@@ -145,6 +143,7 @@ service perfd /system/vendor/bin/perfd
    class main
    user root
    disabled
+   writepid /dev/cpuset/system-background/tasks
 
 service seempd /system/bin/seempd
    class late_start
@@ -183,7 +182,10 @@ on boot
     chown system drmrpc /sys/devices/soc.0/78b7000.i2c/i2c-3/3-0020/input/input0/secure_touch
     chown system drmrpc /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/secure_touch_enable
     chown system drmrpc /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/secure_touch
-
+    write /proc/sys/kernel/sched_boost 1
+	chown system system  /dev/goodix_fp
+	chmod 0644 /dev/goodix_fp
+	
 service wcnss-service /system/bin/wcnss_service
     class main
     user system
@@ -194,13 +196,13 @@ service imsqmidaemon /system/bin/imsqmidaemon
     class main
     user system
     socket ims_qmid stream 0660 system radio
-    group radio net_raw log qcom_diag
+    group radio net_raw log diag
 
 service imsdatadaemon /system/bin/imsdatadaemon
     class main
     user system
     socket ims_datad stream 0660 system radio
-    group system wifi radio inet net_raw log qcom_diag net_admin
+    group system wifi radio inet net_raw log diag net_admin
     disabled
 
 on property:sys.ims.QMI_DAEMON_STATUS=1
@@ -210,13 +212,13 @@ service ims_rtp_daemon /system/bin/ims_rtp_daemon
    class main
    user system
    socket ims_rtpd stream 0660 system radio
-   group radio net_raw diag qcom_diag log
+   group radio net_raw diag diag inet log
    disabled
 
 service imscmservice /system/bin/imscmservice
    class main
    user system
-   group radio net_raw diag qcom_diag log
+   group radio net_raw diag diag log
    disabled
 
 on property:sys.ims.DATA_DAEMON_STATUS=1
@@ -243,6 +245,7 @@ on charger
     setprop persist.sys.usb.config mass_storage
     start qcom-post-boot
     setprop persist.sys.usb.config mass_storage
+    start hvdcp_opti
 
 service dts_configurator /system/bin/dts_configurator
     class late_start
@@ -330,21 +333,25 @@ on boot
     write /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/fw_name PR1702898-s3528t_00260005_00380008.img
     write /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/update_fw 1
 
-service displayfeature /system/bin/displayfeature
+    # update foreground cpuset now that processors are up
+    write /dev/cpuset/foreground/cpus 0-5
+    write /dev/cpuset/foreground/boost/cpus 4-5
+    write /dev/cpuset/background/cpus 0
+    write /dev/cpuset/system-background/cpus 0-3
+
+service fingerprintd /system/bin/fingerprintd   
+    class late_start 
+    socket fpce stream 0666 system system
+    user system
+
+service gx_fpd /system/bin/gx_fpd
     class late_start
     user system
     group system
+    disabled
+
+on property:ro.boot.fpsensor=gdx
+    start gx_fpd
 
 service mtservice /system/bin/mtd
     class late_start
-    
-service fpdaemon /system/bin/gxFpDaemon
-    user system
-    group system
-    class late_start
-    disabled
-    
-on property:persist.sys.fp.goodix=1    
-    stop fpcd
-    start fpdaemon
-

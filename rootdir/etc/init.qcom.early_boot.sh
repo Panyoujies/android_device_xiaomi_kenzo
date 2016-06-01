@@ -28,33 +28,251 @@
 
 export PATH=/system/bin
 
-# Setup HDMI related nodes & permissions
+# Set platform variables
+if [ -f /sys/devices/soc0/hw_platform ]; then
+    soc_hwplatform=`cat /sys/devices/soc0/hw_platform` 2> /dev/null
+else
+    soc_hwplatform=`cat /sys/devices/system/soc/soc0/hw_platform` 2> /dev/null
+fi
+if [ -f /sys/devices/soc0/soc_id ]; then
+    soc_hwid=`cat /sys/devices/soc0/soc_id` 2> /dev/null
+else
+    soc_hwid=`cat /sys/devices/system/soc/soc0/id` 2> /dev/null
+fi
+if [ -f /sys/devices/soc0/platform_version ]; then
+    soc_hwver=`cat /sys/devices/soc0/platform_version` 2> /dev/null
+else
+    soc_hwver=`cat /sys/devices/system/soc/soc0/platform_version` 2> /dev/null
+fi
+if [ -f /sys/devices/soc0/platform_subtype ]; then
+    soc_hwsubtype=`cat /sys/devices/soc0/platform_subtype` 2> /dev/null
+else
+    soc_hwsubtype=`cat /sys/devices/system/soc/soc0/platform_subtype` 2> /dev/null
+fi
+
+target=`getprop ro.board.platform`
+case "$target" in
+    "msm7630_surf" | "msm7630_1x" | "msm7630_fusion")
+        case "$soc_hwplatform" in
+            "FFA" | "SVLTE_FFA")
+                # linking to surf_keypad_qwerty.kcm.bin instead of surf_keypad_numeric.kcm.bin so that
+                # the UI keyboard works fine.
+                ln -s  /system/usr/keychars/surf_keypad_qwerty.kcm.bin /system/usr/keychars/surf_keypad.kcm.bin
+                ;;
+            "Fluid")
+                setprop ro.sf.lcd_density 240
+                setprop qcom.bt.dev_power_class 2
+                ;;
+            *)
+                ln -s  /system/usr/keychars/surf_keypad_qwerty.kcm.bin /system/usr/keychars/surf_keypad.kcm.bin
+                ;;
+        esac
+        ;;
+
+    "msm8660")
+        case "$soc_hwplatform" in
+            "Fluid")
+                setprop ro.sf.lcd_density 240
+                ;;
+            "Dragon")
+                setprop ro.sound.alsa "WM8903"
+                ;;
+        esac
+        ;;
+
+    "msm8960")
+        # lcd density is write-once. Hence the separate switch case
+        case "$soc_hwplatform" in
+            "Liquid")
+                if [ "$soc_hwver" == "196608" ]; then # version 0x30000 is 3D sku
+                    setprop ro.sf.hwrotation 90
+                fi
+
+                setprop ro.sf.lcd_density 160
+                ;;
+            "MTP")
+                setprop ro.sf.lcd_density 240
+                ;;
+            *)
+                case "$soc_hwid" in
+                    "109")
+                        setprop ro.sf.lcd_density 160
+                        ;;
+                    *)
+                        setprop ro.sf.lcd_density 240
+                        ;;
+                esac
+            ;;
+        esac
+
+        #Set up composition type based on the target
+        case "$soc_hwid" in
+            87)
+                #8960
+                setprop debug.composition.type dyn
+                ;;
+            153|154|155|156|157|138)
+                #8064 V2 PRIME | 8930AB | 8630AB | 8230AB | 8030AB | 8960AB
+                setprop debug.composition.type c2d
+                ;;
+            *)
+        esac
+        ;;
+
+    "msm8974")
+        case "$soc_hwplatform" in
+            "Liquid")
+                setprop ro.sf.lcd_density 160
+                # Liquid do not have hardware navigation keys, so enable
+                # Android sw navigation bar
+                setprop ro.hw.nav_keys 0
+                ;;
+            "Dragon")
+                setprop ro.sf.lcd_density 240
+                ;;
+            *)
+                setprop ro.sf.lcd_density 320
+                ;;
+        esac
+        ;;
+
+    "msm8226")
+        case "$soc_hwplatform" in
+            *)
+                setprop ro.sf.lcd_density 320
+                ;;
+        esac
+        ;;
+
+    "msm8610" | "apq8084" | "mpq8092")
+        case "$soc_hwplatform" in
+            *)
+                setprop ro.sf.lcd_density 240
+                ;;
+        esac
+        ;;
+    "apq8084")
+        case "$soc_hwplatform" in
+            "Liquid")
+                setprop ro.sf.lcd_density 320
+                # Liquid do not have hardware navigation keys, so enable
+                # Android sw navigation bar
+                setprop ro.hw.nav_keys 0
+                ;;
+            "SBC")
+                setprop ro.sf.lcd_density 200
+                # SBC do not have hardware navigation keys, so enable
+                # Android sw navigation bar
+                setprop qemu.hw.mainkeys 0
+                ;;
+            *)
+                setprop ro.sf.lcd_density 480
+                ;;
+        esac
+        ;;
+      "msm8952")
+        case "$soc_hwid" in
+                264|277)
+                    setprop ro.sf.lcd_density 480
+                    ;;
+                278)
+                    if [ "$soc_hwplatform" == 'QRD' ] && [ "$soc_hwsubtype" == "POLARIS" ]; then
+                        setprop ro.sf.lcd_density 320
+                    else
+                        setprop ro.sf.lcd_density 480
+                    fi
+                    setprop media.msm8956hw 1
+                    setprop media.settings.xml /etc/media_profiles_8956.xml
+                    if [ -f /sys/devices/soc0/platform_version ]; then
+                        hw_ver=`cat /sys/devices/soc.0/1d00000.qcom,vidc/version` 2> /dev/null
+                        if [ $hw_ver -eq 1 ]; then
+                            setprop media.msm8956.version 1
+                        fi
+                    fi
+                    ;;
+                266)
+                    setprop ro.sf.lcd_density 480
+                    setprop media.msm8956hw 1
+                    setprop media.settings.xml /etc/media_profiles_8956.xml
+                    if [ -f /sys/devices/soc0/platform_version ]; then
+                        hw_ver=`cat /sys/devices/soc.0/1d00000.qcom,vidc/version` 2> /dev/null
+                        if [ $hw_ver -eq 1 ]; then
+                            setprop media.msm8956.version 1
+                        fi
+                    fi
+                    ;;
+            *)
+                setprop ro.sf.lcd_density 320
+        esac
+        ;;
+esac
+
+# Setup display nodes & permissions
 # HDMI can be fb1 or fb2
 # Loop through the sysfs nodes and determine
 # the HDMI(dtv panel)
-for fb_cnt in 0 1 2
+
+function set_perms() {
+    #Usage set_perms <filename> <ownership> <permission>
+    chown -h $2 $1
+    chmod $3 $1
+}
+
+function setHDMIPermission() {
+   file=/sys/class/graphics/fb$1
+   dev_file=/dev/graphics/fb$1
+   dev_gfx_hdmi=/devices/virtual/switch/hdmi
+
+   set_perms $file/hpd system.graphics 0664
+   set_perms $file/res_info system.graphics 0664
+   set_perms $file/vendor_name system.graphics 0664
+   set_perms $file/product_description system.graphics 0664
+   set_perms $file/video_mode system.graphics 0664
+   set_perms $file/format_3d system.graphics 0664
+   set_perms $file/s3d_mode system.graphics 0664
+   set_perms $file/cec/enable system.graphics 0664
+   set_perms $file/cec/logical_addr system.graphics 0664
+   set_perms $file/cec/rd_msg system.graphics 0664
+   set_perms $file/pa system.graphics 0664
+   set_perms $file/cec/wr_msg system.graphics 0600
+   set_perms $file/hdcp/tp system.graphics 0664
+   ln -s $dev_file $dev_gfx_hdmi
+}
+
+# check for HDMI connection
+for fb_cnt in 1 2
 do
-file=/sys/class/graphics/fb$fb_cnt
-dev_file=/dev/graphics/fb$fb_cnt
-  if [ -d "$file" ]
-  then
-    value=`cat $file/msm_fb_type`
-    case "$value" in
-            "dtv panel")
-        chown -h system.graphics $file/hpd
-        chown -h system.system $file/hdcp/tp
-        chown -h system.graphics $file/vendor_name
-        chown -h system.graphics $file/product_description
-        chmod -h 0664 $file/hpd
-        chmod -h 0664 $file/hdcp/tp
-        chmod -h 0664 $file/vendor_name
-        chmod -h 0664 $file/product_description
-        chmod -h 0664 $file/video_mode
-        chmod -h 0664 $file/format_3d
-        # create symbolic link
-        ln -s $dev_file /dev/graphics/hdmi
-        # Change owner and group for media server and surface flinger
-        chown -h system.system $file/format_3d;;
-    esac
-  fi
+    file=/sys/class/graphics/fb$fb_cnt/msm_fb_panel_info
+    if [ -f "$file" ]
+    then
+      cat $file | while read line; do
+        case "$line" in
+            *"is_pluggable"*)
+             case "$line" in
+                  *"1"*)
+                  setHDMIPermission $fb_cnt
+             esac
+        esac
+      done
+    fi
 done
+
+file=/sys/class/graphics/fb0
+if [ -d "$file" ]
+then
+        set_perms $file/idle_time system.graphics 0664
+        set_perms $file/dynamic_fps system.graphics 0664
+        set_perms $file/dyn_pu system.graphics 0664
+        set_perms $file/modes system.graphics 0664
+        set_perms $file/mode system.graphics 0664
+        set_perms $file/mdp/bw_mode_bitmap system.graphics 0664
+fi
+
+boot_reason=`cat /proc/sys/kernel/boot_reason`
+reboot_reason=`getprop ro.boot.alarmboot`
+if [ "$boot_reason" = "3" ] || [ "$reboot_reason" = "true" ]; then
+    setprop ro.alarm_boot true
+    setprop debug.sf.nobootanimation 1
+else
+    setprop ro.alarm_boot false
+fi

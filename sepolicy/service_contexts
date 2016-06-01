@@ -1,0 +1,4 @@
+# Goodix Fingerprint
+goodix.fp                                 	   u:object_r:gx_fpd_service:s0
+fm_fingerprint_service                    	   u:object_r:fm_fingerprint_service:s0
+DisplayFeatureControl                          u:object_r:DisplayFeatureControl_service:s0

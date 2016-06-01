@@ -132,6 +132,7 @@ case "$baseband" in
 esac
 
 start_sensors
+start_copying_prebuilt_qcril_db
 
 if [ -f /sys/class/graphics/fb0/modes ]; then
 	panel_res=`cat /sys/class/graphics/fb0/modes`
@@ -301,7 +302,7 @@ case "$target" in
                             ;;
                        "MTP")
                             case "$platform_subtype_id" in
-                                 "0")
+                                 "0" | "1")
                                       setprop qemu.hw.mainkeys 0
                                       ;;
                             esac
@@ -337,7 +338,8 @@ case "$target" in
                             ;;
                        "MTP")
                             case "$platform_subtype_id" in
-                                 "0")
+                                 "0" | "1")
+                                      setprop qemu.hw.mainkeys 1
                                       ;;
                             esac
                             ;;
@@ -372,7 +374,7 @@ case "$target" in
                             ;;
                        "MTP")
                             case "$platform_subtype_id" in
-                                 "0")
+                                 "0" | "1")
                                       setprop qemu.hw.mainkeys 0
                                       ;;
                             esac
@@ -408,7 +410,7 @@ case "$target" in
                             ;;
                        "MTP")
                             case "$platform_subtype_id" in
-                                 "0")
+                                 "0" | "1")
                                       setprop qemu.hw.mainkeys 0
                                       ;;
                             esac

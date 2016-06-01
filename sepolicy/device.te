@@ -1,0 +1,14 @@
+# Fingerprint device
+type gx_fpd_device, dev_type;
+
+type fpce_socket, dev_type;
+type lirc_device, dev_type;
+type gx_fpd_exec, dev_type;
+type consumerir_test_exec, dev_type;
+type displayfeature_exec, dev_type;
+type sysfs_fpc_dev, dev_type;
+type fpc_data_file, dev_type;
+type gx_fpd_data_file, dev_type;
+type gx_fpd_service, dev_type;
+type fm_fingerprint_service, dev_type;
+type DisplayFeatureControl_service, dev_type;
