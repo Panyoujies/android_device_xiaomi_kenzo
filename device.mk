@@ -314,10 +314,6 @@ PRODUCT_PACKAGES += \
     libcnefeatureconfig \
     libtinyxml
 
-# Maintainer
-#PRODUCT_PROPERTY_OVERRIDES += \
-#    ro.mk.maintainer=Flour_Mo
-
 ADDITIONAL_DEFAULT_PROPERTIES += \
     ro.secure=0 \
     ro.adb.secure=0

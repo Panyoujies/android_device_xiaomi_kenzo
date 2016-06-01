@@ -210,3 +210,5 @@ camera.lowpower.record.enable=1
 
 #enable game colocation feature
 sched.colocate.enable=1
+
+ro.mk.maintainer=Flour_Mo
