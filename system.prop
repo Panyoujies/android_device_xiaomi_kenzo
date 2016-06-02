@@ -182,6 +182,8 @@ ro.sys.fw.bservice_age=5000
 # Enable Delay Service Restart
 ro.am.reschedule_service=true
 
+ro.sf.lcd_density=480
+
 #Trim properties
 ro.sys.fw.use_trim_settings=true
 ro.sys.fw.empty_app_percent=50
