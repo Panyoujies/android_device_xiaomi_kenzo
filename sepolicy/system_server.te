@@ -1,1 +1,1 @@
-allow system_server lirc_device:chr_file { read write open };
+allow system_server lirc_device:chr_file { read write open ioctl };

@@ -1,0 +1,1 @@
+allow qmuxd rild_qmuxd_socket:sock_file { getattr unlink };

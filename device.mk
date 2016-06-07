@@ -145,6 +145,7 @@ PRODUCT_PACKAGES += \
     tinymix
 	
 PRODUCT_PACKAGES += \
+    libshim_sound_trigger \
     libaudio-resampler \
     libqcompostprocbundle \
     libqcomvisualizer \
@@ -174,6 +175,10 @@ PRODUCT_PACKAGES += \
 # Snap Config
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.camera.cpp.duplication=false
+
+# Lights
+PRODUCT_PACKAGES += \
+    lights.msm8952
 
 # Power
 PRODUCT_PACKAGES += \
