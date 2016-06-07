@@ -205,6 +205,7 @@ PRODUCT_PACKAGES += \
     init.qcom.bms.sh \
     init.qcom.class_core.sh \
     init.qcom.early_boot.sh \
+    init.qcom.post_boot.sh \
     init.qcom.factory.rc \
     init.qcom.rc \
     init.qcom.sh \
