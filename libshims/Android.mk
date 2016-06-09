@@ -19,3 +19,15 @@ LOCAL_SRC_FILES := hw_audio.c
 LOCAL_MODULE := libshim_sound_trigger
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_SHARED_LIBRARY)
+
+# healthd
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+    healthd_board_kenzo.cpp
+
+LOCAL_MODULE := libhealthd.kenzo
+LOCAL_C_INCLUDES := system/core/healthd
+LOCAL_CFLAGS := -Werror
+
+include $(BUILD_STATIC_LIBRARY)
